@@ -8,7 +8,7 @@ class SharedProject(QCAlgorithm):
         self.SetStartDate(2018, 1, 12)
         self.SetEndDate(2024, 1, 12)
         self.SetCash(100000)
-        self.xauusd = self.AddForex("XAUUSD", Resolution.Daily, Market.Oanda).Symbol
+        self.xauusd = self.AddCfd("XAUUSD", Resolution.Daily, Market.Oanda).Symbol
         self.bb = self.BB(self.xauusd, 20, 2)
 
         stockPlot = Chart("Trade Plot")
