@@ -10,6 +10,7 @@ class SharedProject(QCAlgorithm):
         self.SetCash(100000)
         self.xauusd = self.AddCfd("XAUUSD", Resolution.Daily, Market.Oanda).Symbol
         self.bb = self.BB(self.xauusd, 20, 2)
+        self.rsi = self.RSI(self.xauusd, 20)
 
         stockPlot = Chart("Trade Plot")
         stockPlot.AddSeries(Series("Buy", SeriesType.Scatter, "$", Color.Green, ScatterMarkerSymbol.Triangle))
@@ -17,8 +18,14 @@ class SharedProject(QCAlgorithm):
         stockPlot.AddSeries(Series("Liquidate", SeriesType.Scatter, "$", Color.Blue, ScatterMarkerSymbol.Diamond))
         self.AddChart(stockPlot)
 
+        
+
+
     def on_data(self, data: Slice):
-        if not self.bb.IsReady:
+        if not self.bb.IsReady:  
+            return
+
+        if not self.rsi.IsReady:
             return
         
         price = data[self.xauusd].Price
@@ -28,10 +35,10 @@ class SharedProject(QCAlgorithm):
         self.Plot("Trade Plot", "LowerBand", self.bb.LowerBand.Current.Value)
 
         if not self.Portfolio.Invested:
-            if self.bb.LowerBand.Current.Value > price:
+            if self.bb.LowerBand.Current.Value > price and self.rsi.Current.Value > 70:
                 self.SetHoldings(self.xauusd, 1)
                 self.Plot("Trade Plot", "Buy", price)
-            elif self.bb.UpperBand.Current.Value < price:
+            elif self.bb.UpperBand.Current.Value < price and self.rsi.Current.Value < 30 :
                 self.SetHoldings(self.xauusd, -1)
                 self.Plot("Trade Plot", "Sell", price)
         else:
