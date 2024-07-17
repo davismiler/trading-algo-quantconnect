@@ -35,10 +35,10 @@ class SharedProject(QCAlgorithm):
         self.Plot("Trade Plot", "LowerBand", self.bb.LowerBand.Current.Value)
 
         if not self.Portfolio.Invested:
-            if self.bb.LowerBand.Current.Value > price and self.rsi.Current.Value > 70:
+            if self.bb.LowerBand.Current.Value > price and self.rsi.Current.Value < 25:
                 self.SetHoldings(self.xauusd, 1)
                 self.Plot("Trade Plot", "Buy", price)
-            elif self.bb.UpperBand.Current.Value < price and self.rsi.Current.Value < 30 :
+            elif self.bb.UpperBand.Current.Value < price and self.rsi.Current.Value < 75:
                 self.SetHoldings(self.xauusd, -1)
                 self.Plot("Trade Plot", "Sell", price)
         else:
