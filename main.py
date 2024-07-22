@@ -8,10 +8,14 @@ class SharedProject(QCAlgorithm):
         self.set_start_date(2022, 1, 1)
         self.set_cash(100000)
 
-        self.xauusd = self.add_cfd("XAUUSD", Resolution.Daily, Market.OANDA).symbol
+        self.xauusd = self.add_cfd("XAUUSD", Resolution.MINUTE, Market.OANDA).symbol
         self.bb = self.BB(self.xauusd, 20, 2)
         self.rsi = self.RSI(self.xauusd, 20)
 
+        # operates on a 30 min time frame
+        self.consolidate("XAUUSD", timedelta(minutes=15), self.on_30_data)
+
+        # creates plot of portfolio activity 
         stock_plot = Chart("Trade Plot")
         stock_plot.add_series(Series("Buy", SeriesType.SCATTER, "$", 
         Color.Green, ScatterMarkerSymbol.TRIANGLE))
@@ -24,11 +28,11 @@ class SharedProject(QCAlgorithm):
 
         self.add_chart(stock_plot)
 
-    def on_data(self, data: Slice):
+    def on_30_data(self, bar):
         if not self.bb.is_ready or not self.rsi.is_ready:
             return
 
-        price = data[self.xauusd].price
+        price = bar.close
 
         self.plot("Trade Plot", "Price", price)
         self.plot("Trade Plot", "MiddleBand", self.bb.middle_band.current.value)
@@ -50,3 +54,6 @@ class SharedProject(QCAlgorithm):
             elif self.bb.middle_band.current.value > price:
                     self.liquidate()
                     self.plot("Trade Plot", "Liquidate", price)
+
+    def on_data(self, data: Slice):
+        pass
