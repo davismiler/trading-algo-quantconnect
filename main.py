@@ -15,6 +15,10 @@ class SharedProject(QCAlgorithm):
         # operates on a 30 min time frame
         self.consolidate("XAUUSD", timedelta(minutes=15), self.on_30_data)
 
+        # creates a stop loss
+        self.exit_price = None
+        self.percentage_risk = 0.02
+
         # creates plot of portfolio activity 
         stock_plot = Chart("Trade Plot")
         stock_plot.add_series(Series("Buy", SeriesType.SCATTER, "$", 
@@ -43,17 +47,35 @@ class SharedProject(QCAlgorithm):
             if self.bb.lower_band.current.value > price and self.rsi.current.Value < 30:
                 self.set_holdings(self.xauusd, 1)
                 self.plot("Trade Plot", "Buy", price)
+                self.exit_price = (1 - self.percentage_risk) * price
             elif self.bb.upper_band.current.value < price and self.rsi.current.Value < 70:
                 self.set_holdings(self.xauusd, -1)
                 self.plot("Trade Plot", "Sell", price)
+                self.exit_price = (1 + self.percentage_risk) * price
         else:
             if self.portfolio[self.xauusd].is_long:
-                if self.bb.middle_band.current.value < price:
+                if self.bb.middle_band.current.value <= price:
                     self.liquidate()
                     self.plot("Trade Plot", "Liquidate", price)
-            elif self.bb.middle_band.current.value > price:
+                    self.exit_price = None
+            elif self.bb.middle_band.current.value >= price:
                     self.liquidate()
                     self.plot("Trade Plot", "Liquidate", price)
+                    self.exit_price = None
+            
 
     def on_data(self, data: Slice):
-        pass
+        if not self.exit_price:
+            return
+
+        price = data[self.xauusd].price
+
+        if self.portfolio[self.xauusd].is_long:
+            if price < self.exit_price:
+                self.liquidate()
+                self.exit_price = None
+                
+        else:
+            if price > self.exit_price:
+                self.liquidate()
+                self.exit_price = None
