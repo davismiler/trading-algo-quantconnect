@@ -11,6 +11,7 @@ class SharedProject(QCAlgorithm):
         self.xauusd = self.add_cfd("XAUUSD", Resolution.MINUTE, Market.OANDA).symbol
         self.bb = self.BB(self.xauusd, 20, 2)
         self.rsi = self.RSI(self.xauusd, 20)
+        self.adx = self.ADX(self.xauusd, 20)
 
         # operates on a 30 min time frame
         self.consolidate("XAUUSD", timedelta(minutes=15), self.on_30_data)
@@ -33,7 +34,7 @@ class SharedProject(QCAlgorithm):
         self.add_chart(stock_plot)
 
     def on_30_data(self, bar):
-        if not self.bb.is_ready or not self.rsi.is_ready:
+        if not self.bb.is_ready or not self.rsi.is_ready or not self.adx.is_ready:
             return
 
         price = bar.close
@@ -44,11 +45,11 @@ class SharedProject(QCAlgorithm):
         self.plot("Trade Plot", "LowerBand", self.bb.lower_band.current.value)
 
         if not self.portfolio.invested:
-            if self.bb.lower_band.current.value > price and self.rsi.current.Value < 30:
+            if self.bb.lower_band.current.value > price and self.rsi.current.value < 30 and self.adx.current.value > 20:
                 self.set_holdings(self.xauusd, 1)
                 self.plot("Trade Plot", "Buy", price)
                 self.exit_price = (1 - self.percentage_risk) * price
-            elif self.bb.upper_band.current.value < price and self.rsi.current.Value < 70:
+            elif self.bb.upper_band.current.value < price and self.rsi.current.Value < 70 and self.adx.current.value > 20:
                 self.set_holdings(self.xauusd, -1)
                 self.plot("Trade Plot", "Sell", price)
                 self.exit_price = (1 + self.percentage_risk) * price
