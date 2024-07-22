@@ -5,47 +5,48 @@ from AlgorithmImports import *
 class SharedProject(QCAlgorithm):
 
     def initialize(self):
-        self.SetStartDate(2018, 1, 12)
-        self.SetEndDate(2024, 1, 12)
-        self.SetCash(100000)
-        self.xauusd = self.AddCfd("XAUUSD", Resolution.Daily, Market.Oanda).Symbol
+        self.set_start_date(2022, 1, 1)
+        self.set_cash(100000)
+
+        self.xauusd = self.add_cfd("XAUUSD", Resolution.Daily, Market.OANDA).symbol
         self.bb = self.BB(self.xauusd, 20, 2)
         self.rsi = self.RSI(self.xauusd, 20)
 
-        stockPlot = Chart("Trade Plot")
-        stockPlot.AddSeries(Series("Buy", SeriesType.Scatter, "$", Color.Green, ScatterMarkerSymbol.Triangle))
-        stockPlot.AddSeries(Series("Sell", SeriesType.Scatter, "$", Color.Red, ScatterMarkerSymbol.TriangleDown))
-        stockPlot.AddSeries(Series("Liquidate", SeriesType.Scatter, "$", Color.Blue, ScatterMarkerSymbol.Diamond))
-        self.AddChart(stockPlot)
+        stock_plot = Chart("Trade Plot")
+        stock_plot.add_series(Series("Buy", SeriesType.SCATTER, "$", 
+        Color.Green, ScatterMarkerSymbol.TRIANGLE))
+        stock_plot.add_series(Series("Sell", SeriesType.SCATTER, "$", 
+        Color.Green, ScatterMarkerSymbol.TRIANGLE_DOWN))
+        stock_plot.add_series(Series("Liquidate", SeriesType.SCATTER, "$", 
+        Color.Green, ScatterMarkerSymbol.DIAMOND))
 
-        
+        self.set_benchmark("SPY")
 
+        self.add_chart(stock_plot)
 
     def on_data(self, data: Slice):
-        if not self.bb.IsReady:  
+        if not self.bb.is_ready or not self.rsi.is_ready:
             return
 
-        if not self.rsi.IsReady:
-            return
-        
-        price = data[self.xauusd].Price
-        self.Plot("Trade Plot", "Price", price)
-        self.Plot("Trade Plot", "MiddleBand", self.bb.MiddleBand.Current.Value)
-        self.Plot("Trade Plot", "UpperBand", self.bb.UpperBand.Current.Value)
-        self.Plot("Trade Plot", "LowerBand", self.bb.LowerBand.Current.Value)
+        price = data[self.xauusd].price
 
-        if not self.Portfolio.Invested:
-            if self.bb.LowerBand.Current.Value > price and self.rsi.Current.Value > 70:
-                self.SetHoldings(self.xauusd, 1)
-                self.Plot("Trade Plot", "Buy", price)
-            elif self.bb.UpperBand.Current.Value < price and self.rsi.Current.Value < 30 :
-                self.SetHoldings(self.xauusd, -1)
-                self.Plot("Trade Plot", "Sell", price)
+        self.plot("Trade Plot", "Price", price)
+        self.plot("Trade Plot", "MiddleBand", self.bb.middle_band.current.value)
+        self.plot("Trade Plot", "UpperBand", self.bb.upper_band.current.value)
+        self.plot("Trade Plot", "LowerBand", self.bb.lower_band.current.value)
+
+        if not self.portfolio.invested:
+            if self.bb.lower_band.current.value > price and self.rsi.current.Value < 30:
+                self.set_holdings(self.xauusd, 1)
+                self.plot("Trade Plot", "Buy", price)
+            elif self.bb.upper_band.current.value < price and self.rsi.current.Value < 70:
+                self.set_holdings(self.xauusd, -1)
+                self.plot("Trade Plot", "Sell", price)
         else:
-            if self.Portfolio[self.xauusd].IsLong:
-                if self.bb.MiddleBand.Current.Value < price:
-                    self.Liquidate()
-                    self.Plot("Trade Plot", "Liquidate", price)
-            elif self.bb.MiddleBand.Current.Value > price:
-                self.Liquidate()
-                self.Plot("Trade Plot", "Liquidate", price)
+            if self.portfolio[self.xauusd].is_long:
+                if self.bb.middle_band.current.value < price:
+                    self.liquidate()
+                    self.plot("Trade Plot", "Liquidate", price)
+            elif self.bb.middle_band.current.value > price:
+                    self.liquidate()
+                    self.plot("Trade Plot", "Liquidate", price)
