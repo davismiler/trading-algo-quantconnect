@@ -30,6 +30,7 @@ class SharedProject(QCAlgorithm):
 
         price = data[self.xauusd].price
 
+<<<<<<< HEAD
         self.plot("Trade Plot", "Price", price)
         self.plot("Trade Plot", "MiddleBand", self.bb.middle_band.current.value)
         self.plot("Trade Plot", "UpperBand", self.bb.upper_band.current.value)
@@ -42,6 +43,15 @@ class SharedProject(QCAlgorithm):
             elif self.bb.upper_band.current.value < price and self.rsi.current.Value < 70:
                 self.set_holdings(self.xauusd, -1)
                 self.plot("Trade Plot", "Sell", price)
+=======
+        if not self.Portfolio.Invested:
+            if self.bb.LowerBand.Current.Value > price and self.rsi.Current.Value < 25:
+                self.SetHoldings(self.xauusd, 1)
+                self.Plot("Trade Plot", "Buy", price)
+            elif self.bb.UpperBand.Current.Value < price and self.rsi.Current.Value < 75:
+                self.SetHoldings(self.xauusd, -1)
+                self.Plot("Trade Plot", "Sell", price)
+>>>>>>> baa480e245d37d0a2863eb8881fd2caee20f357e
         else:
             if self.portfolio[self.xauusd].is_long:
                 if self.bb.middle_band.current.value < price:
