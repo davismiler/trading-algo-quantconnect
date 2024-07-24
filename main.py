@@ -16,6 +16,8 @@ class SharedProject(QCAlgorithm):
             config = json.loads(model_str)['config']
             self.model = Sequential.from_config(config)
 
+        self.rolling_window = RollingWindow[QuoteBar](40)
+
         self.xauusd = self.add_cfd("XAUUSD", Resolution.MINUTE, Market.OANDA).symbol
         self.bb = self.BB(self.xauusd, 20, 2)
         self.rsi = self.RSI(self.xauusd, 20)
@@ -23,6 +25,8 @@ class SharedProject(QCAlgorithm):
 
         # operates on a 30 min time frame
         self.consolidate("XAUUSD", timedelta(minutes=30), self.on_30_data)
+
+        self.consolidate("XAUUSD", Resolution.MINUTE, self.on_minute_data)
 
         # creates a stop loss
         self.exit_price = None
@@ -56,6 +60,9 @@ class SharedProject(QCAlgorithm):
         self.set_benchmark("SPY")
 
         self.add_chart(stock_plot)
+    
+    def on_minute_data(self, bar):
+        self.rolling_window.add(bar)
 
     def on_30_data(self, bar):
         if not self.bb.is_ready or not self.rsi.is_ready or not self.adx.is_ready or not self.is_trading_enabled:
@@ -107,7 +114,14 @@ class SharedProject(QCAlgorithm):
 
 
     def get_prediction(self):
-        df = self.History(self.xauusd,40).loc[self.xauusd]
+        data = [{
+            'open': bar.Open,
+            'high': bar.High,
+            'low': bar.Low,
+            'close': bar.Close
+        } for bar in self.rolling_window]
+
+        df = pd.DataFrame(data)
         df_change = df[["open", "high", "low", "close"]].pct_change().dropna()
         model_input = []
         for index, row in df_change.tail(30).iterrows():
