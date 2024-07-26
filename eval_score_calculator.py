@@ -1,11 +1,13 @@
+import csv
+# “XAUUSD”, “GBPUSD”, “EURGBP”, “AUDNZD”, “CADJPY”, “GBPCHF”
 def generate_row():
     # Enter percentages
     pair = input("Name of the pair: ")
     sharpe_ratio = float(input("Sharpe Ratio: ")) * 0.25
-    maximum_drawdown = float(input("Maximum Drawdown: ")) * 0.25     # Drawdown
+    maximum_drawdown = float(input("Maximum Drawdown: ")) * -0.25     # Drawdown
     annualised_return = float(input("Annualised Return: ")) * 0.20   # Compounding Annual Return
-    volatility = float(input("volatility: ")) * 0.15                 # Annual Standard deviation
-    cumulative_return = float(input("Cumulative Return: ")) * 0.08   # (net profit / strarting equity)
+    volatility = float(input("volatility: ")) * -0.15                 # Annual Standard deviation
+    cumulative_return = float(input("Cumulative Return: ")) * 0.08   # Return
     sortino_ratio = float(input("Sortino Ratio: ")) * 0.03
     winning_rate = float(input("Winning Rate: ")) * 0.02
     average_trade_return = float(input("Average Trade Return: ")) * 0.02     # (win rate * average win) + (loss rate * average loss)
@@ -18,7 +20,7 @@ def generate_row():
         "Sharpe Ratio": sharpe_ratio,
         "Maximum Drawdown": maximum_drawdown,
         "Annualised Return": annualised_return,
-        "volatility": volatility,
+        "Volatility": volatility,
         "Cumulative Return": cumulative_return,
         "Sortino Ratio": sortino_ratio,
         "Winning Rate": winning_rate,
@@ -42,18 +44,20 @@ def load_rows_from_csv(filename):
     try:
         with open(filename, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-            for row in reader:
+            
+            for csv_row in reader:
+                row = {}
                 # Convert all values to appropriate types
-                row["Sharpe Ratio"] = float(row["Sharpe Ratio"])
-                row["Maximum Drawdown"] = float(row["Maximum Drawdown"])
-                row["Annualised Return"] = float(row["Annualised Return"])
-                row["Volatility"] = float(row["Volatility"])
-                row["Cumulative Return"] = float(row["Cumulative Return"])
-                row["Sortino Ratio"] = float(row["Sortino Ratio"])
-                row["Winning Rate"] = float(row["Winning Rate"])
-                row["Profit"] = float(row["Profit"])
-                row["Average Trade Return"] = float(row["Average Trade Return"])
-                row["Overall"] = float(row["Overall"])
+                row["Pair"] = str(csv_row["Pair"])
+                row["Sharpe Ratio"] = float(csv_row["Sharpe Ratio"])
+                row["Maximum Drawdown"] = float(csv_row["Maximum Drawdown"])
+                row["Annualised Return"] = float(csv_row["Annualised Return"])
+                row["Volatility"] = float(csv_row["Volatility"])
+                row["Cumulative Return"] = float(csv_row["Cumulative Return"])
+                row["Sortino Ratio"] = float(csv_row["Sortino Ratio"])
+                row["Winning Rate"] = float(csv_row["Winning Rate"])
+                row["Average Trade Return"] = float(csv_row["Average Trade Return"])
+                row["Overall"] = float(csv_row["Overall"])
                 rows.append(row)
     except FileNotFoundError:
         pass  # If the file does not exist, return an empty list
@@ -62,18 +66,25 @@ def load_rows_from_csv(filename):
 # File where the data will be saved
 filename = "algorithm_evaluation.csv"
 
-# Load existing rows from the CSV file
-#rows = load_rows_from_csv(filename)
+choice = input("Load or input values (L/I): ")
 
-rows = []
-while True:
-    rows.append(generate_row())
-    more = input("Do you want to add another row? (yes/no): ")
-    if more.lower() != 'yes':
-        break
+if choice.lower() == "l":
 
-# Save the rows to the CSV file
-save_rows_to_csv(filename, rows)
+    # Load existing rows from the CSV file
+    rows = load_rows_from_csv(filename)
+
+else:
+
+    rows = []
+    while True:
+        rows.append(generate_row())
+        more = input("Do you want to add another row? (Y/N): ")
+        if more.lower() != 'y':
+            break
+
+    # Save the rows to the CSV file
+    save_rows_to_csv(filename, rows)
+
 
 # Create and print the table
 from tabulate import tabulate
