@@ -18,10 +18,15 @@ class SharedProject(QCAlgorithm):
 
         self.rolling_window = RollingWindow[QuoteBar](40)
 
+        self.bb_length = self.get_parameter("bb_length")
+        self.rsi_length = self.get_parameter("rsi_length")
+        self.adx_length = self.get_parameter("adx_length")
+
+        # Optimise paramters for this pair
         self.xauusd = self.add_cfd("XAUUSD", Resolution.MINUTE, Market.OANDA).symbol
-        self.bb = self.BB(self.xauusd, 20, 2)
-        self.rsi = self.RSI(self.xauusd, 20)
-        self.adx = self.ADX(self.xauusd, 20)
+        self.bb = self.BB(self.xauusd, self.bb_length, 2)
+        self.rsi = self.RSI(self.xauusd, self.rsi_length)
+        self.adx = self.ADX(self.xauusd, self.adx_length)
 
         # operates on a 30 min time frame
         self.consolidate("XAUUSD", timedelta(minutes=30), self.on_30_data)
