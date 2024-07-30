@@ -6,28 +6,38 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from access_api import APIAccess
+
+
+
 
 # Define a simple environment
 class SimpleEnv:
     def __init__(self):
-        self.state = np.array([11,4,0]) # Example state with 3 inputs
-        
+        self.api_object = APIAccess(298141,"f5f148c306562e6b458321e389255f6445b0ad7f7377ed96f71d4d87d7aeb44d",18808389,"XAUUSD")
+        self.inital_params = self.api_object.get_parameters()
+        self.state = np.array(self.inital_params)
+        self.prev_backtest_id = self.api_object.backtest()
 
     def reset(self):
-        self.state = np.array([11,4,7])
+        self.state = self.inital_params
+        self.prev_backtest_id = self.api_object.backtest()
         return self.state
 
     def step(self, action):
 
-        prev_score = 0.2 * self.state[0] + 0.5 * self.state[1] + 0.3 * self.state[2]
+        prev_score = self.api_object.compute_score_from_results(self.prev_backtest_id)
 
         # Adds or Subtracts one from one of the values in the state
         index = action // 2
         change = 1 if action % 2 == 0 else -1
         self.state[index] += change
 
-        
-        new_score = 0.2 * self.state[0] + 0.5 * self.state[1] + 0.3 * self.state[2]
+        self.api_object.update_parameters(self.state[0], self.state[1], self.state[2])
+        new_backtest_id = self.api_object.backtest()
+        new_score = self.api_object.compute_score_from_results(new_backtest_id)
+
+        self.prev_backtest_id = new_backtest_id
         
         reward = new_score - prev_score
         
