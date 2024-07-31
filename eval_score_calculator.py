@@ -1,5 +1,6 @@
 import csv
-# “XAUUSD”, “GBPUSD”, “EURGBP”, “AUDNZD”, “CADJPY”, “GBPCHF”
+
+
 def generate_row():
     # Enter percentages
     pair = input("Name of the pair: ")
@@ -14,7 +15,7 @@ def generate_row():
 
     overall = sharpe_ratio + maximum_drawdown + annualised_return + volatility + cumulative_return + sortino_ratio + winning_rate + average_trade_return 
 
-    # Create a dictionary representing the row
+    # Creates a dictionary representing the row
     row = {
         "Pair": pair,
         "Sharpe Ratio": sharpe_ratio,
@@ -47,7 +48,7 @@ def load_rows_from_csv(filename):
             
             for csv_row in reader:
                 row = {}
-                # Convert all values to appropriate types
+                # Converts all values to appropriate types
                 row["Pair"] = str(csv_row["Pair"])
                 row["Sharpe Ratio"] = float(csv_row["Sharpe Ratio"])
                 row["Maximum Drawdown"] = float(csv_row["Maximum Drawdown"])
@@ -66,15 +67,17 @@ def load_rows_from_csv(filename):
 # File where the data will be saved
 filename = "algorithm_evaluation.csv"
 
+
 choice = input("Load or input values (L/I): ")
 
 if choice.lower() == "l":
 
-    # Load existing rows from the CSV file
+    # Loads existing rows from the CSV file
     rows = load_rows_from_csv(filename)
 
 else:
 
+    # Creates an indefinite number of rows 
     rows = []
     while True:
         rows.append(generate_row())
@@ -86,9 +89,8 @@ else:
     save_rows_to_csv(filename, rows)
 
 
-# Create and print the table
+# Creates and prints the table
 from tabulate import tabulate
-
 headers = ["Pair", "Sharpe Ratio", "Maximum Drawdown", "Annualised Return", "Volatility", "Cumulative Return", "Sortino Ratio", "Winning Rate", "Average Trade Return", "Overall"]
 table = [list(row.values()) for row in rows]
 print(tabulate(table, headers=headers, floatfmt=".4f", tablefmt="grid"))

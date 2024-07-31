@@ -9,17 +9,17 @@ import torch.optim as optim
 from access_api import APIAccess
 
 
-
-
 # Define a simple environment
 class SimpleEnv:
     def __init__(self):
+        # The intital state represents the paramters of the trading algorithm when intialised
         self.api_object = APIAccess(298141,"f5f148c306562e6b458321e389255f6445b0ad7f7377ed96f71d4d87d7aeb44d",18808389,"XAUUSD")
         self.inital_params = self.api_object.get_parameters()
         self.state = np.array(self.inital_params)
         self.prev_backtest_id = self.api_object.backtest()
 
     def reset(self):
+        # Resets the state to the state of the environment when it was was intitialised
         self.state = self.inital_params
         self.prev_backtest_id = self.api_object.backtest()
         return self.state
@@ -33,12 +33,14 @@ class SimpleEnv:
         change = 1 if action % 2 == 0 else -1
         self.state[index] += change
 
+        # Updates the model through the API based on the action
         self.api_object.update_parameters(self.state[0], self.state[1], self.state[2])
         new_backtest_id = self.api_object.backtest()
         new_score = self.api_object.compute_score_from_results(new_backtest_id)
 
         self.prev_backtest_id = new_backtest_id
         
+        # Reward is positive when the score increased from the previous step
         reward = new_score - prev_score
         
         next_state = self.state
@@ -51,8 +53,10 @@ class SimpleEnv:
 class DQNetwork(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(DQNetwork, self).__init__()
+
         # Creates a fully connected layer with input_dim inputs and 64 outputs
         self.fc1 = nn.Linear(input_dim, 64)
+
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, output_dim)
 
@@ -88,25 +92,34 @@ def train_agent():
         state = torch.FloatTensor(state)
         total_reward = 0
 
-        for t in range(100):  # Increased max steps per episode
+        # 100 steps per episode
+        for t in range(100):  
+
             if np.random.rand() < epsilon:
                 action = np.random.randint(0, 2 * state_dim)
             else:
+                # Selects the action with the highest predicted reward
                 with torch.no_grad():
                     action_values = model(state)
                 action = torch.argmax(action_values).item()
 
+            # Performs the action
             next_state, reward, done, _ = env.step(action)
             next_state = torch.FloatTensor(next_state)
             total_reward += reward
 
+            # Adds the immediate reward to the discounted maximum future reward (predicted)
             target = reward + gamma * torch.max(model(next_state)).item()
 
-            output = model(state)
+            # Prediction for all actions in the current state
+            output = model(state) 
             target_f = output.clone()
+
+            # Updates chosen action with our target
             target_f[action] = target
             loss = criterion(output, target_f)
 
+            # Updates model parmaters based on calculated gradients (backpropagtion)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

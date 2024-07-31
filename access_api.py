@@ -6,6 +6,7 @@ import time
 
 
 class APIAccess():
+    
     def __init__(self, user_id, api_token, project_id, name_of_pair):
 
         self.USER_ID = user_id
@@ -18,6 +19,7 @@ class APIAccess():
         self.headers = self.authenticate()
         self.compile_id = self.compile_project()
 
+    # Establishes connection to the API and returns the required headers to authenticate requests
     def authenticate(self):
 
         # Get timestamp
@@ -48,6 +50,7 @@ class APIAccess():
             return headers
         return None
 
+    # Reads in the paramters from the project and returns them as an array
     def get_parameters(self):
         parameters = [0,0,0]
         response = requests.get("https://www.quantconnect.com/api/v2/projects/read", 
@@ -71,7 +74,7 @@ class APIAccess():
             return parameters
         return None
         
-
+    # Updates the project's paramters using the given values
     def update_parameters(self, bb_value, rsi_value, adx_value):
         response = requests.post("https://www.quantconnect.com/api/v2/projects/update", 
                                 json = {
@@ -88,6 +91,7 @@ class APIAccess():
                 print(error)
         return None
 
+    # Compiles the project and returns the compile ID
     def compile_project(self):
 
         response = requests.post("https://www.quantconnect.com/api/v2/compile/create", 
@@ -105,6 +109,7 @@ class APIAccess():
             return compile_id
         return None
 
+    # Backtests the project and returns the backtest ID
     def backtest(self):
         response = requests.post("https://www.quantconnect.com/api/v2/projects/update", 
                                 json = {
@@ -123,6 +128,7 @@ class APIAccess():
             self.counter += 1
             return backtest_id
         
+    # Reads the results from the backtest provided, computes and returns a score 
     def compute_score_from_results(self, backtest_id):
             response = requests.post("https://www.quantconnect.com/api/v2/projects/update", 
                                 json = {
