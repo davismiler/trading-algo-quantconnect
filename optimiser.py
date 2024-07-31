@@ -98,7 +98,7 @@ def train_agent():
             if np.random.rand() < epsilon:
                 action = np.random.randint(0, 2 * state_dim)
             else:
-                # Selects the action with the highest predicted reward
+                # Selects the action with the highest predicted value (sum of dicounted future rewards)
                 with torch.no_grad():
                     action_values = model(state)
                 action = torch.argmax(action_values).item()
@@ -108,7 +108,7 @@ def train_agent():
             next_state = torch.FloatTensor(next_state)
             total_reward += reward
 
-            # Adds the immediate reward to the discounted maximum future reward (predicted)
+            # Adds the immediate reward to the discounted predicted maximum value
             target = reward + gamma * torch.max(model(next_state)).item()
 
             # Prediction for all actions in the current state
@@ -119,7 +119,7 @@ def train_agent():
             target_f[action] = target
             loss = criterion(output, target_f)
 
-            # Updates model parmaters based on calculated gradients (backpropagtion)
+            # Updates model parmaters using backpropagation to minimise the loss function
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
