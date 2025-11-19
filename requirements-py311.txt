@@ -1,0 +1,24 @@
+# Requirements file for Python 3.11/3.12 (recommended for TensorFlow)
+# Use this file if you're using Python 3.11 or 3.12
+
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+tabulate>=0.9.0
+
+# Machine Learning
+tensorflow>=2.13.0
+keras>=2.13.0
+
+# Reinforcement Learning
+torch>=2.0.0
+gym>=0.26.0  # Latest version is 0.26.2
+
+# API and Environment
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# QuantConnect LEAN (installed via QuantConnect platform)
+# AlgorithmImports is provided by QuantConnect platform
+

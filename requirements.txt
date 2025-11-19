@@ -1,0 +1,49 @@
+# Core dependencies
+# Note: Python 3.14 compatibility - some packages may need latest versions
+numpy>=1.26.0
+pandas>=2.2.0
+matplotlib>=3.8.0
+tabulate>=0.9.0
+
+# Machine Learning
+# IMPORTANT: TensorFlow does not yet support Python 3.14 (as of 2024)
+# TensorFlow currently supports Python 3.9-3.12
+# 
+# Solutions:
+# 1. Use Python 3.11 or 3.12 (recommended for best compatibility)
+# 2. For QuantConnect: TensorFlow is provided by the platform, no local install needed
+# 3. For local development: Use Python 3.11/3.12 or wait for TensorFlow 3.14 support
+#
+# If using Python 3.11 or 3.12, uncomment the following:
+# tensorflow>=2.16.0
+# keras>=2.16.0
+#
+# For QuantConnect platform: TensorFlow/Keras are pre-installed
+# No local installation required for algorithm deployment
+
+# Reinforcement Learning
+torch>=2.4.0
+gym>=0.26.0  # Latest version is 0.26.2 (no 0.28.0 available)
+
+# API and Environment
+requests>=2.32.0
+python-dotenv>=1.0.1
+
+# QuantConnect LEAN (installed via QuantConnect platform)
+# AlgorithmImports is provided by QuantConnect platform
+
+# Python Version Compatibility Notes:
+# - Python 3.14: TensorFlow not yet supported (use Python 3.11 or 3.12)
+# - Python 3.11/3.12: Full compatibility with all packages
+# - Python 3.9/3.10: Should work but may need older package versions
+#
+# For QuantConnect Development:
+# - TensorFlow/Keras are provided by QuantConnect platform
+# - Local installation only needed for research.ipynb development
+# - Consider using Python 3.11/3.12 for local research environment
+#
+# Installation Instructions:
+# 1. If using Python 3.14: Install packages individually, skip TensorFlow
+# 2. If using Python 3.11/3.12: pip install -r requirements.txt
+# 3. For QuantConnect: Upload code directly, no local TensorFlow needed
+

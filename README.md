@@ -15,21 +15,27 @@ This project implements a sophisticated trading system that:
 ## Project Structure
 
 - **`research.ipynb`** - Jupyter notebook for model development and experimentation
+- **`base_trading_algorithm.py`** - Base class for trading algorithms (reduces code duplication)
 - **`forex.py`** - Main trading algorithm for forex pairs (GBPUSD)
 - **`cfd.py`** - CFD trading algorithm optimized for XAUUSD (Gold)
 - **`optimiser.py`** - Reinforcement learning agent for parameter optimization
 - **`access_api.py`** - QuantConnect API integration for backtesting and data access
 - **`eval_score_calculator.py`** - Performance evaluation and scoring system
 - **`algorithm_evaluation.csv`** - Historical performance results across different trading pairs
+- **`.env.example`** - Template for environment variables (copy to `.env` and fill in credentials)
+- **`requirements.txt`** - Python package dependencies
 
 ## Key Features
 
 ### 1. Machine Learning Price Prediction
 
-- **Neural Network Architecture**: Sequential model with Dense layers (30 → 20 → 1)
+- **Neural Network Architecture**: Improved Sequential model with Dense layers (64 → 32 → 1)
+- **Regularization**: L2 regularization and Dropout (0.3) to prevent overfitting
+- **Training Features**: Batch normalization, early stopping, and learning rate scheduling
 - **Input Features**: 30-minute rolling window of OHLC percentage changes
 - **Prediction Target**: Binary classification (price up/down)
 - **Training Data**: 2020-2022 historical market data
+- **Data Split**: 60% training, 20% validation, 20% test
 
 ### 2. Technical Analysis Integration
 
@@ -97,20 +103,99 @@ Based on backtesting results in `algorithm_evaluation.csv`, the algorithm shows 
 
 ## Requirements
 
-- Python 3.11+
-- TensorFlow/Keras
-- NumPy, Pandas
-- PyTorch (for RL optimization)
-- QuantConnect Platform access
-- Matplotlib (for visualization)
-- Tabulate (for result formatting)
+### Python Version Compatibility
+
+**Important:** TensorFlow does not yet support Python 3.14 (as of 2024). TensorFlow currently supports Python 3.9-3.12.
+
+**Recommended Setup:**
+- **For local development:** Use Python 3.11 or 3.12 for full package compatibility
+- **For QuantConnect:** Python version is managed by the platform (TensorFlow/Keras are pre-installed)
+- **If using Python 3.14:** Core packages work, but TensorFlow must be used on QuantConnect platform only
+
+### Package Requirements
+
+- **Core:** NumPy, Pandas, Matplotlib, Tabulate
+- **Machine Learning:** TensorFlow/Keras (provided by QuantConnect platform)
+- **Reinforcement Learning:** PyTorch, Gym (for local optimization)
+- **API:** Requests, python-dotenv
+- **Platform:** QuantConnect Platform access
+
+## Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd TradingAlgoQuantConnect
+   ```
+
+2. **Install dependencies**
+   
+   **If using Python 3.11 or 3.12:**
+   ```bash
+   pip install -r requirements-py311.txt
+   ```
+   
+   **If using Python 3.14:**
+   ```bash
+   pip install -r requirements-minimal.txt
+   # Note: TensorFlow will be provided by QuantConnect platform
+   ```
+   
+   **Or install core packages manually:**
+   ```bash
+   pip install numpy pandas matplotlib tabulate requests python-dotenv
+   ```
+
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and fill in your QuantConnect credentials:
+   ```
+   QC_USER_ID=your_user_id
+   QC_API_TOKEN=your_api_token
+   QC_PROJECT_ID=your_project_id
+   QC_PAIR_NAME=XAUUSD
+   ```
+
+4. **Train the ML model** (on QuantConnect platform)
+   - Open `research.ipynb` in QuantConnect Research environment
+   - Run all cells to train and save the model
+
+5. **Deploy trading algorithms**
+   - Upload `forex.py` or `cfd.py` to QuantConnect
+   - Ensure the trained model is saved in ObjectStore
+   - Configure parameters (bb_length, rsi_length, adx_length) if using optimization
 
 ## Usage
 
-1. **Model Training**: Run `research.ipynb` to train the price prediction model
-2. **Algorithm Deployment**: Use `forex.py` or `cfd.py` depending on the trading pair
-3. **Parameter Optimization**: Execute `optimiser.py` to find optimal indicator parameters
+1. **Model Training**: Run `research.ipynb` in QuantConnect Research to train the price prediction model
+2. **Algorithm Deployment**: Use `forex.py` or `cfd.py` depending on the trading pair (both inherit from `base_trading_algorithm.py`)
+3. **Parameter Optimization**: Execute `optimiser.py` locally (requires `.env` configuration) to find optimal indicator parameters
 4. **Performance Evaluation**: Use `eval_score_calculator.py` to assess results
+
+## Recent Improvements
+
+### Code Quality
+- ✅ Moved hardcoded credentials to `.env` file for security
+- ✅ Fixed typos (`.Value` → `.value`) in trading algorithms
+- ✅ Refactored code to reduce duplication using base class
+- ✅ Added comprehensive error handling and validation
+- ✅ Improved API error handling with proper exception management
+
+### Model Architecture
+- ✅ Added validation set (60/20/20 split)
+- ✅ Implemented L2 regularization and dropout
+- ✅ Added batch normalization for training stability
+- ✅ Implemented early stopping and learning rate scheduling
+- ✅ Enhanced evaluation metrics (precision, recall)
+- ✅ Fixed train/test split bug in research notebook
+
+### Code Structure
+- ✅ Created `BaseTradingAlgorithm` class to eliminate code duplication
+- ✅ Improved error handling throughout codebase
+- ✅ Added type hints and documentation
+- ✅ Created `requirements.txt` for dependency management
 
 ## QuantConnect Integration
 

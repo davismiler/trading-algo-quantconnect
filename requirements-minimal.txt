@@ -1,0 +1,22 @@
+# Minimal requirements for Python 3.14 (without TensorFlow)
+# Use this if you're using Python 3.14 and only need non-ML dependencies
+# Note: TensorFlow is provided by QuantConnect platform for algorithm deployment
+
+# Core dependencies
+numpy>=1.26.0
+pandas>=2.2.0
+matplotlib>=3.8.0
+tabulate>=0.9.0
+
+# Reinforcement Learning (PyTorch may work with Python 3.14)
+torch>=2.4.0
+gym>=0.26.0  # Latest version is 0.26.2 (no 0.28.0 available)
+
+# API and Environment
+requests>=2.32.0
+python-dotenv>=1.0.1
+
+# QuantConnect LEAN (installed via QuantConnect platform)
+# AlgorithmImports is provided by QuantConnect platform
+# TensorFlow/Keras: Provided by QuantConnect platform, no local install needed
+
